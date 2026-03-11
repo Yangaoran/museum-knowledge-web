@@ -37,7 +37,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { getSimilarArtifacts } from '@/api'
+import { searchGraph, getSimilarArtifacts } from '@/api'
 import type { RecommendItem } from '@/types'
 import RecommendCard from '@/components/recommend/RecommendCard.vue'
 
@@ -47,8 +47,14 @@ const loading = ref(true)
 
 onMounted(async () => {
   try {
-    const res = await getSimilarArtifacts('a001')
+    const searchRes = await searchGraph({ keyword: '', type: 'Artifact', limit: 1 })
+    const firstArtifact = searchRes.data.nodes[0]
+    if (!firstArtifact) return
+
+    const res = await getSimilarArtifacts(firstArtifact.id)
     recommends.value = res.data
+  } catch {
+    // silently handled — shows empty state
   } finally {
     loading.value = false
   }

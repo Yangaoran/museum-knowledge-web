@@ -88,6 +88,8 @@ async function fetchDetail() {
   try {
     const res = await getArtifactDetail(props.id)
     artifact.value = res.data
+  } catch {
+    artifact.value = null
   } finally {
     loading.value = false
   }

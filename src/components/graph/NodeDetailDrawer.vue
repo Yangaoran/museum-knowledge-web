@@ -1,10 +1,10 @@
 <template>
   <el-drawer
-    :model-value="visible"
+    v-model="open"
     title="节点详情"
     direction="rtl"
     size="360px"
-    @close="emit('close')"
+    destroy-on-close
   >
     <template v-if="node">
       <div class="node-detail">
@@ -60,10 +60,15 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  close: []
+  'update:visible': [value: boolean]
   expand: [nodeId: string]
   'view-detail': [nodeId: string]
 }>()
+
+const open = computed({
+  get: () => props.visible,
+  set: (val: boolean) => emit('update:visible', val),
+})
 
 const NODE_COLORS: Record<string, string> = {
   Artifact: '#409EFF', Person: '#67C23A', Dynasty: '#E6A23C',

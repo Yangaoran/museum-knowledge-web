@@ -82,6 +82,8 @@ onMounted(async () => {
         options,
       )
     }
+  } catch {
+    // handled by interceptor toast
   } finally {
     loading.value = false
   }

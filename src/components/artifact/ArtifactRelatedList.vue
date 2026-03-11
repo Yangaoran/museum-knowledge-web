@@ -32,7 +32,9 @@ const loading = ref(true)
 onMounted(async () => {
   try {
     const res = await getSimilarArtifacts(props.artifactId)
-    recommends.value = res.data.slice(0, 5)
+    recommends.value = (res.data ?? []).slice(0, 5)
+  } catch {
+    recommends.value = []
   } finally {
     loading.value = false
   }

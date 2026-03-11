@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { searchGraph, getNeighbors } from '@/api'
 import type { GraphNode, GraphEdge, VisNode, VisEdge } from '@/types'
+import { ElMessage } from 'element-plus'
 
 const NODE_COLORS: Record<string, { background: string; border: string }> = {
   Artifact: { background: '#409EFF', border: '#337ecc' },
@@ -55,14 +56,18 @@ export const useGraphStore = defineStore('graph', () => {
   const selectedNode = ref<GraphNode | null>(null)
   const keyword = ref('')
 
-  async function search(kw: string) {
+  async function search(kw: string, type?: string) {
     loading.value = true
     keyword.value = kw
     try {
-      const res = await searchGraph({ keyword: kw })
+      const res = await searchGraph({ keyword: kw, type: type || undefined, limit: 50 })
       const data = res.data
       nodes.value = data.nodes.map(toVisNode)
       edges.value = data.edges.map(toVisEdge)
+    } catch (e: any) {
+      ElMessage.error(e?.message || '图谱搜索失败')
+      nodes.value = []
+      edges.value = []
     } finally {
       loading.value = false
     }
@@ -88,6 +93,8 @@ export const useGraphStore = defineStore('graph', () => {
           existingEdgeIds.add(edgeKey)
         }
       })
+    } catch (e: any) {
+      ElMessage.error(e?.message || '扩展邻居节点失败')
     } finally {
       loading.value = false
     }

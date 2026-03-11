@@ -2,17 +2,17 @@
   <el-container class="app-layout">
     <el-header class="app-header">
       <div class="header-left">
-        <router-link to="/" class="logo">
+        <a class="logo" href="/" @click.prevent="navigateTo('/')">
           <el-icon :size="24"><Connection /></el-icon>
           <span class="logo-text">博物馆知识图谱</span>
-        </router-link>
+        </a>
       </div>
       <el-menu
         :default-active="activeMenu"
         mode="horizontal"
         :ellipsis="false"
         class="header-menu"
-        router
+        @select="navigateTo"
       >
         <el-menu-item index="/">
           <el-icon><HomeFilled /></el-icon>
@@ -33,7 +33,9 @@
       </el-menu>
     </el-header>
     <el-main class="app-main">
-      <router-view />
+      <router-view v-slot="{ Component, route: viewRoute }">
+        <component :is="Component" :key="viewRoute.path" />
+      </router-view>
     </el-main>
     <el-footer class="app-footer">
       <span>博物馆知识图谱交互系统 &copy; 2026 毕业设计</span>
@@ -43,16 +45,25 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { HomeFilled, Share, ChatDotRound, Star, Connection } from '@element-plus/icons-vue'
 
 const route = useRoute()
+const router = useRouter()
+
 const activeMenu = computed(() => {
-  if (route.path.startsWith('/graph')) return '/graph'
-  if (route.path.startsWith('/qa')) return '/qa'
-  if (route.path.startsWith('/recommend')) return '/recommend'
+  const p = route.path
+  if (p.startsWith('/graph')) return '/graph'
+  if (p.startsWith('/qa')) return '/qa'
+  if (p.startsWith('/recommend')) return '/recommend'
+  if (p.startsWith('/artifact')) return '/'
   return '/'
 })
+
+function navigateTo(path: string) {
+  if (route.path === path) return
+  router.push(path).catch(() => {})
+}
 </script>
 
 <style scoped>
@@ -68,6 +79,7 @@ const activeMenu = computed(() => {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   padding: 0 24px;
   z-index: 100;
+  position: relative;
   height: 60px;
 }
 
@@ -84,6 +96,7 @@ const activeMenu = computed(() => {
   font-weight: 600;
   font-size: 18px;
   white-space: nowrap;
+  cursor: pointer;
 }
 
 .logo .el-icon {

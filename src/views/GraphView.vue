@@ -23,7 +23,7 @@
           :value="t.value"
         />
       </el-select>
-      <el-button @click="graphStore.clearGraph()">清空</el-button>
+      <el-button @click="handleClear">清空</el-button>
     </div>
 
     <div class="graph-content">
@@ -46,20 +46,20 @@
           </div>
         </div>
       </div>
-
-      <NodeDetailDrawer
-        :visible="drawerVisible"
-        :node="graphStore.selectedNode"
-        @close="drawerVisible = false"
-        @expand="handleExpand"
-        @view-detail="handleViewDetail"
-      />
     </div>
+
+    <!-- Drawer 放在页面根级，使用 v-model:visible 双向绑定 -->
+    <NodeDetailDrawer
+      v-model:visible="drawerVisible"
+      :node="graphStore.selectedNode"
+      @expand="handleExpand"
+      @view-detail="handleViewDetail"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { Search } from '@element-plus/icons-vue'
 import { useGraphStore, NODE_COLORS } from '@/stores'
@@ -91,9 +91,11 @@ const legendItems = computed(() => {
   return items
 })
 
-async function handleSearch() {
-  if (!searchKeyword.value.trim()) return
-  await graphStore.search(searchKeyword.value.trim())
+function handleSearch() {
+  const kw = searchKeyword.value.trim()
+  if (!kw) return
+  drawerVisible.value = false
+  graphStore.search(kw, filterType.value || undefined)
 }
 
 function handleNodeClick(node: GraphNode) {
@@ -110,8 +112,18 @@ function handleExpand(nodeId: string) {
 }
 
 function handleViewDetail(nodeId: string) {
-  router.push(`/artifact/${nodeId}`)
+  drawerVisible.value = false
+  router.push(`/artifact/${nodeId}`).catch(() => {})
 }
+
+function handleClear() {
+  drawerVisible.value = false
+  graphStore.clearGraph()
+}
+
+onBeforeUnmount(() => {
+  drawerVisible.value = false
+})
 </script>
 
 <style scoped>

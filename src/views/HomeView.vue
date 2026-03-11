@@ -125,8 +125,12 @@ const features = [
 ]
 
 onMounted(async () => {
-  const res = await getStatsOverview()
-  stats.value = res.data
+  try {
+    const res = await getStatsOverview()
+    stats.value = res.data
+  } catch {
+    // handled by interceptor toast
+  }
 })
 </script>
 

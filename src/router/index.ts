@@ -43,12 +43,18 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+  scrollBehavior(_to, _from, savedPosition) {
+    return savedPosition || { top: 0 }
+  },
 })
 
-router.beforeEach((to, _from, next) => {
+router.afterEach((to) => {
   const title = (to.meta?.title as string) || '博物馆知识图谱'
   document.title = `${title} - 博物馆知识图谱交互系统`
-  next()
+})
+
+router.onError((error) => {
+  console.error('[Router] error:', error)
 })
 
 export default router
